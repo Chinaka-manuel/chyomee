@@ -61,10 +61,11 @@ In another terminal:
 ```powershell
 cd client
 npm ci
+Copy-Item .env.example .env
 npm run dev
 ```
 
-Open the local URL printed by Vite. The development storefront connects to the API at `http://localhost:5000/api/v1`.
+Open the local URL printed by Vite. Client API and image URLs are configured through `client/.env`; see [client environment notes](./client/README.md). Client `VITE_` values are public, so never put secrets in them.
 
 ## Administrator access
 

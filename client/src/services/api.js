@@ -1,55 +1,17 @@
-const getDefaultApiBase = () => {
-  if (typeof window === "undefined") return "http://localhost:5000/api/v1";
-
-  const hostname = window.location.hostname.toLowerCase();
-  if (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "[::1]"
-  ) {
-    return "http://localhost:5000/api/v1";
-  }
-
-  if (window.location.pathname.startsWith("/admin")) {
-    return `${window.location.origin}/api/v1`;
-  }
-
-  return `${window.location.origin}/api/v1`;
-};
-
 const configuredApiBase = import.meta.env.VITE_API_URL?.trim();
-const usesCanonicalProductionFrontend =
-  typeof window !== "undefined" &&
-  (window.location.hostname.toLowerCase() === "www.nicemanagro.com" ||
-   window.location.hostname.toLowerCase() === "niceman-agro-ecommerce.onrender.com");
-const productionApiBase = "https://www.nicemanagro.com/api/v1";
-const isLocalBrowser =
-  typeof window !== "undefined" &&
-  ["localhost", "127.0.0.1", "[::1]"].includes(
-    window.location.hostname.toLowerCase(),
-  );
-const isLocalConfiguredApi =
-  configuredApiBase &&
-  /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i.test(
-    configuredApiBase,
-  );
-const rawApiBase =
-  usesCanonicalProductionFrontend
-    ? productionApiBase
-    : isLocalConfiguredApi && !isLocalBrowser
-      ? getDefaultApiBase()
-      : configuredApiBase || getDefaultApiBase();
+if (!configuredApiBase) {
+  throw new Error("Missing VITE_API_URL. Configure the client environment before building.");
+}
 
 const normalizeApiBase = (value) => {
-  const trimmed = (value || "").trim().replace(/\/+$/, "");
+  const trimmed = value.trim().replace(/\/+$/, "");
 
-  if (!trimmed) return getDefaultApiBase();
   if (/\/api\/v1$/i.test(trimmed)) return trimmed;
   if (/\/api$/i.test(trimmed)) return `${trimmed}/v1`;
   return `${trimmed}/api/v1`;
 };
 
-export const API_URL = normalizeApiBase(rawApiBase);
+export const API_URL = normalizeApiBase(configuredApiBase);
 
 let refreshInFlight = null;
 
@@ -153,7 +115,9 @@ const api = async (endpoint, options = {}) => {
       data.error ||
       (Array.isArray(data.errors) ? data.errors.join(", ") : data.errors);
     const requestMethod = (requestOptions.method || "GET").toUpperCase();
-    const requestPath = new URL(requestUrl).pathname;
+    const requestPath = requestUrl.startsWith("/")
+      ? requestUrl
+      : new URL(requestUrl).pathname;
     const message =
       typeof responseMessage === "string" &&
       responseMessage.trim() &&

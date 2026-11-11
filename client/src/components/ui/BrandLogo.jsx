@@ -1,11 +1,8 @@
-const logoUrl =
-  "https://res.cloudinary.com/dybaoehch/image/upload/v1793630175/Chiomeewhite_ajlcl7.png";
-
 function BrandLogo({ className = "h-8 w-auto" }) {
   return (
     <img
-      src={logoUrl}
-      alt="chyomee"
+      src={import.meta.env.VITE_BRAND_LOGO_URL}
+      alt="Chiomee"
       className={`block object-contain ${className}`}
     />
   );

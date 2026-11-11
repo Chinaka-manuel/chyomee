@@ -405,13 +405,11 @@ Working With the Backend Developer
 
 The frontend should consume the API endpoints provided by the backend developer.
 
-API base URL should be stored in an environment variable rather than hardcoded.
+## Client environment
 
-Example:
+Copy `.env.example` to `.env` before running the storefront. `VITE_API_URL` sets the API base path; the local Vite proxy forwards requests to `API_PROXY_TARGET`. Public logo and fashion image URLs are also configured there. In production, set the `VITE_` values in the deployment platform's environment settings. The Vercel API rewrite remains in `vercel.json` so API requests stay same-origin for authentication cookies.
 
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-
-The actual API URL will be provided by the backend developer.
+Values prefixed with `VITE_` are embedded in the browser build and are visible to visitors. Use them only for public configuration such as API paths and image URLs. Never put passwords, passcodes, API keys, database URLs, or other secrets in the client `.env`; keep secrets in the server environment.
 
 Getting Started
 

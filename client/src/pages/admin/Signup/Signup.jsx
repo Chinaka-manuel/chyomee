@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { post } from "../../../services/api";
+import BrandLogo from "../../../components/ui/BrandLogo";
 
 const AdminSignup = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const AdminSignup = () => {
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-3 inline-flex rounded-sm bg-stone-950 px-3 py-2">
-            <img src="https://res.cloudinary.com/dybaoehch/image/upload/v1793630175/chiomeewhite_ajlcl7.png" alt="chyomee" className="h-[100px] w-[100px] bg-transparent object-contain" />
+            <BrandLogo className="h-[100px] w-[100px]" />
           </div>
 
           <p className="mt-2 text-sm text-gray-500">

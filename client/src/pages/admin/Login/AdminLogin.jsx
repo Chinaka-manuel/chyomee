@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "../../../context/useAdmin";
 import { fashionImages } from "../../../data/fashionImages";
+import BrandLogo from "../../../components/ui/BrandLogo";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +55,7 @@ const AdminLogin = () => {
         {/* Brand */}
         <div className="text-center mb-6">
           <div className="mx-auto mb-3 inline-flex rounded-sm bg-transparent px-3 py-2 shadow-lg">
-            <img src="https://res.cloudinary.com/dybaoehch/image/upload/v1793630175/chiomeewhite_ajlcl7.png" alt="chyomee" className="h-[100px] w-[100px] bg-transparent object-contain" />
+            <BrandLogo className="h-[100px] w-[100px]" />
           </div>
 
           <p className="mt-1 text-sm text-gray-300">Admin Management Portal</p>

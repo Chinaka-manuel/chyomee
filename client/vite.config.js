@@ -5,10 +5,16 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, fileURLToPath(new URL(".", import.meta.url)), "");
-  const configuredApiUrl = (env.VITE_API_URL || "").trim();
-  const apiTarget = configuredApiUrl
-    ? configuredApiUrl.replace(/\/api\/v1\/?$/i, "").replace(/\/api\/?$/i, "")
-    : "http://localhost:5000";
+  const apiTarget = (env.API_PROXY_TARGET || "").trim();
+  const proxy = apiTarget
+    ? {
+        "/api": {
+          target: apiTarget,
+          changeOrigin: true,
+          secure: !apiTarget.startsWith("http://"),
+        },
+      }
+    : undefined;
 
   return {
     plugins: [
@@ -20,24 +26,12 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "0.0.0.0",
       port: 5173,
-      proxy: {
-        "/api": {
-          target: apiTarget,
-          changeOrigin: true,
-          secure: false,
-        },
-      },
+      ...(proxy ? { proxy } : {}),
     },
     preview: {
       host: "0.0.0.0",
       port: 4173,
-      proxy: {
-        "/api": {
-          target: apiTarget,
-          changeOrigin: true,
-          secure: false,
-        },
-      },
+      ...(proxy ? { proxy } : {}),
     },
   };
 });
