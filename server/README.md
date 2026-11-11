@@ -1,0 +1,24 @@
+# backend_class
+## Administrator setup
+
+Administrator name, email, and password are stored as a MongoDB `User` record; passwords are hashed before they are saved. They are not administrator account settings and should not be stored in `.env`.
+
+To register an administrator, open the administrator signup page and enter the configured `ADMIN_PASSCODE`. The server validates the passcode as part of the signup request and creates the account in MongoDB. For trusted command-line provisioning, run `npm run admin:create` from the `server` directory; it prompts for the administrator's name, email, and password rather than loading them from `.env`. Both registration paths refuse to replace an existing account and require email verification when verification is enabled.
+
+Set `MONGODB_URL`, a high-entropy `JWT_SECRET` (at least 32 characters), `JWT_ACCESS_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`, `CLIENT_URL`, and `API_URL`. Configure `RESEND_API_KEY` with a Resend API key and `RESEND_FROM_EMAIL` with a sender address on a domain verified in Resend. Set `RESEND_WEBHOOK_SECRET` to the signing secret generated for your Resend webhook. Configure the Resend webhook destination as `https://niceman-agro-ecommerce.onrender.com/api/v1/webhooks/resend`; keep the signing secret in the server environment and never put it in the URL. Subscribe to the email events you want to track, such as sent, delivered, bounced, complained, opened, and clicked. The endpoint verifies Resend signatures and updates email delivery status in MongoDB. Admin order, payment receipt, and contact notifications are sent to active, verified administrator accounts in MongoDB; no admin email address is required in `.env`. Resend delivers account verification, password reset, order confirmation, admin order notification, contact form messages, and payment receipt emails. Order confirmations include the order reference; once payment is confirmed, the itemized receipt and payment reference are sent to both the customer and registered administrators. Bank-transfer customers can report that they have paid, but payment remains pending until an administrator verifies and approves it. Checkout currently charges no delivery fee. Set `CLIENT_URL` to the exact production frontend origin and `API_URL` to the externally reachable API origin. `PAYSTACK_SECRET_KEY` is only needed if Paystack payments are enabled; other payment methods can continue without it.
+
+## Paystack payments
+
+Set `PAYSTACK_SECRET_KEY` in the server environment only. Use a Paystack test secret key in development and a live secret key in production; never put either key in the client `.env` or source code. Customer checkout requires a signed-in account and server-calculates product prices, delivery, and the final NGN amount.
+
+In the Paystack Dashboard, configure the webhook URL as `https://<your-api-host>/api/v1/payments/webhook`. The endpoint validates `x-paystack-signature` against the raw request body and verifies successful transactions with Paystack before marking an order paid. The callback returns to `<CLIENT_URL>/payment/success`; that page also verifies the transaction server-side and provides a printable receipt. Successful webhook processing sends an email receipt through Resend.
+
+The frontend and API must be deployed over HTTPS for production payments and Paystack webhooks. A webhook URL on localhost is not reachable by Paystack.
+
+## Customer loyalty
+
+Customers earn loyalty credit worth 1% of the amount actually paid, rounded to the nearest kobo. Credit is added only after Paystack verifies payment or an administrator approves a reported bank transfer. Once the balance reaches NGN 5,000, it can be applied to checkout; the server caps the discount at the order subtotal. Redemption is reserved when the order is created and restored if the unpaid order is cancelled or its reservation expires. A loyalty balance that covers the entire order completes payment immediately without another payment step.
+
+Admin APIs are mounted at `/api/v1/admin`; catalog reads remain public at `/api/v1/products`, while writes require an administrator session. Admin and customer sessions use `HttpOnly` cookies and require email verification. MongoDB/Mongoose is used here: PostgreSQL row-level security and SQL parameterization do not apply. Enforce least-privilege MongoDB credentials, network restrictions, encrypted transport, and backups in the database deployment.
+
+Production uses only `https://www.nicemanagro.com` as its frontend origin. The apex host redirects to `www`; browser API calls go through the frontend origin at `/api/v1`, which Vercel proxies to the Render API. This keeps authentication cookies first-party and avoids browsers blocking cross-site cookies. Set the Render `CLIENT_URL` environment variable to exactly `https://www.nicemanagro.com`; the server refuses to start in production if it is set to another origin.

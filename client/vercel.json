@@ -1,0 +1,25 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "nicemanagro.com"
+        }
+      ],
+      "destination": "https://www.nicemanagro.com/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://niceman-agro-ecommerce.onrender.com/api/v1/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
